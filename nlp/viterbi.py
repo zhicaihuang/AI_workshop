@@ -21,13 +21,16 @@ emission_prob = {
     "cloudy": {"g": 0.2, "b": 0.3, "n": 0.5},
 }
 
-
+# two method to find the best path, result maybe diff, because using max and sort 
+# the result diff in condition of the same prob.
 def viterbi(observations, states, init_state_prob, transform_prob, emission_prob):
-    # first state is s, seem as key.
+    # last state is s, because we find the best last state, in last step, it find itself.
     path = {s: [] for s in states}
     max_pro = {}
     for c_s in states:
         max_pro[c_s] = init_state_prob[c_s] * emission_prob[c_s][observations[0]]
+    print(max_pro)
+    print("---------------------")
 
     for obs_idx in range(1, len(observations)):
         prob_state = list()
@@ -40,23 +43,40 @@ def viterbi(observations, states, init_state_prob, transform_prob, emission_prob
                     * emission_prob[c_s][observations[obs_idx]]
                 )
                 prob_state.append((prob, l_s))
-        best_prob, best_last_state = max(prob_state)
-        max_pro[c_s] = best_prob
-        path[c_s].append(best_last_state)
+            best_prob, best_last_state = max(prob_state)
+            # save all path and prob for each state
+            max_pro[c_s] = best_prob
+            path[c_s].append(best_last_state)
+        print(obs_idx)
+        print(path)
+        print(max_pro)
+        print("-----------------------")
 
+    # method 1, max
+    prob_state = list()
+    for f_s in states:
+        prob_state.append((max_pro[f_s], path[f_s] + [f_s]))
+    print("prob_state", prob_state)
+    best_prob, best_path = max(prob_state)
+    print("-----------------------")
+    print('result:',best_prob, best_path)
+    print("-----------------------")
+
+    # method 2, sort
     final_prob = -1
     # f_s: final_state
     for f_s in states:
+        # the best last state is what
         path[f_s].append(f_s)
         if max_pro[f_s] > final_prob:
             best_prob = max_pro[f_s]
             best_path = path[f_s]
-    print(best_prob, best_path)
+    print('result:',best_prob, best_path)
 
 
 def main():
     # observations = ["g", "n", "b"]
-    observations = ["b", "n", "b", "g"]
+    observations = ["b", "n", "b", "g", "g"]
     viterbi(observations, states, init_state_prob, transform_prob, emission_prob)
     pass
 
